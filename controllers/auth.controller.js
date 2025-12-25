@@ -3,7 +3,7 @@ const argon2 = require("argon2");
 const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({
@@ -20,6 +20,7 @@ exports.register = async (req, res) => {
         name,
         email,
         password: hashPassword,
+        ...(role && { role }), 
       },
     });
 
@@ -27,15 +28,18 @@ exports.register = async (req, res) => {
       message: "User registered successfully!",
       user: {
         id: user.id,
+        name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (err) {
     console.error("Registration error:", err);
 
     if (err.code === "P2002") {
-      return res.status(400).json({
-        error: "Email already exists!",
+      return res.status(409).json({
+        error: "Registration failed",
+        message: "Email already exists!",
       });
     }
 

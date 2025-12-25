@@ -43,3 +43,31 @@ exports.addBook = async (req, res) => {
     });
   }
 };
+
+
+exports.getAll = async (req, res) => {
+  try {
+    const books = await prisma.book.findMany({
+      select: {
+        id: true,
+        name: true,
+        writer: true,
+        price: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    res.json({
+      message: "Books retrieved successfully",
+      count: books.length,
+      books,
+    });
+  } catch (err) {
+    console.error("Get all books error:", err);
+    res.status(500).json({
+      error: "Failed to retrieve books",
+      message: err.message,
+    });
+  }
+};
