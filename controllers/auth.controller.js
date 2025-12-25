@@ -94,3 +94,29 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+
+exports.getAll = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createAt: true,
+      },
+    });
+
+    res.json({
+      message: "Users retrieved successfully",
+      count: users.length,
+      users,
+    });
+  } catch (err) {
+    console.error("Get all users error:", err);
+    res.status(500).json({
+      error: "Failed to retrieve users",
+      message: err.message,
+    });
+  }
+};
