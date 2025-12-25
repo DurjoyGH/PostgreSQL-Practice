@@ -46,6 +46,7 @@ exports.register = async (req, res) => {
   }
 };
 
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -73,7 +74,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user.id, role: user.role, }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
 
@@ -84,6 +85,7 @@ exports.login = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -103,7 +105,7 @@ exports.getAll = async (req, res) => {
         id: true,
         name: true,
         email: true,
-        createAt: true,
+        createdAt: true,
       },
     });
 
