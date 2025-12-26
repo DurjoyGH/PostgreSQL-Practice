@@ -10,7 +10,7 @@ exports.addBook = async (req, res) => {
     });
   }
 
-   if (Number.isNaN(Number(price))) {
+  if (Number.isNaN(Number(price))) {
     return res.status(400).json({
       error: "Validation failed",
       message: "Price must be a number",
@@ -19,21 +19,20 @@ exports.addBook = async (req, res) => {
 
   try {
     const book = await prisma.book.create({
-        data: {
-            name: name.trim(),
-            writer: writer.trim(),
-            price: Number(price),
-        }
+      data: {
+        name: name.trim(),
+        writer: writer.trim(),
+        price: Number(price),
+      },
     });
 
     res.status(201).json({
-        message: "Book added successfully!",
-        book: {
-            id: book.id,
-            name: book.name
-        }
+      message: "Book added successfully!",
+      book: {
+        id: book.id,
+        name: book.name,
+      },
     });
-    
   } catch (err) {
     console.error("Book add error:", err);
 
@@ -43,7 +42,6 @@ exports.addBook = async (req, res) => {
     });
   }
 };
-
 
 exports.getAll = async (req, res) => {
   try {
@@ -67,6 +65,39 @@ exports.getAll = async (req, res) => {
     console.error("Get all books error:", err);
     res.status(500).json({
       error: "Failed to retrieve books",
+      message: err.message,
+    });
+  }
+};
+
+exports.deleteBook = async (req, res) => {
+  const bookId  = Number(req.params.id);
+
+  if (!bookId || isNaN(bookId)) {
+    return res.status(400).json({
+      error: "Invalid book id",
+    });
+  }
+
+  try {
+    const book = await prisma.book.findUnique({ where: { id: bookId } });
+
+    if (!book) {
+      return res.status(404).json({
+        error: "Book not found!",
+      });
+    }
+
+    await prisma.book.delete({ where: { id: bookId } });
+
+    res.status(200).json({
+      message: "Book deleted successfully!",
+      bookId,
+    });
+  } catch (err) {
+    console.error("Book delete error:", err);
+    res.status(500).json({
+      error: "Failed to delete book!",
       message: err.message,
     });
   }
