@@ -20,7 +20,7 @@ exports.register = async (req, res) => {
         name,
         email,
         password: hashPassword,
-        ...(role && { role }), 
+        ...(role && { role }),
       },
     });
 
@@ -50,7 +50,6 @@ exports.register = async (req, res) => {
   }
 };
 
-
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -65,24 +64,26 @@ exports.login = async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      return res.status(401).json({
-        error: "User not found!",
-      });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const valid = await argon2.verify(user.password, password);
 
     if (!valid) {
-      return res.status(401).json({
-        error: "Invalid credentials!",
-      });
+      return res.status(401).json({ error: "Invalid password!" });
     }
 
-    const token = jwt.sign({ userId: user.id, role: user.role, }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
 
-    res.json({
+    return res.status(200).json({
       message: "Login successful!",
       token,
       user: {
@@ -95,12 +96,11 @@ exports.login = async (req, res) => {
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({
-      error: "Login failed!",
+      error: "Login failed",
       message: err.message,
     });
   }
 };
-
 
 exports.getAll = async (req, res) => {
   try {
